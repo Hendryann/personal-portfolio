@@ -5,6 +5,7 @@ import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "framer-motion";
 import LoadingScreen from "@/components/LoadingScreen";
 import StarBackground from "@/components/StarBackground";
+import CustomCursor from "@/components/CustomCursor";
 
 const WhatsappIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
   <svg role="img" viewBox="0 0 24 24" className={className} fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -111,6 +112,7 @@ export default function Home() {
   const xLeft = useTransform(scrollY, [0, 800], [0, -250]);
   const xRight = useTransform(scrollY, [0, 800], [0, 250]);
   const contactX = useTransform(scrollY, [2000, 3200], [-200, 100]);
+  
 
   useEffect(() => {
     if ("scrollRestoration" in history) {
@@ -285,7 +287,7 @@ export default function Home() {
           color: transparent;
         }
       `}</style>
-
+      <CustomCursor />
       <AnimatePresence>
         {isLoading && (
           <LoadingScreen onComplete={() => setIsLoading(false)} />
@@ -687,13 +689,13 @@ export default function Home() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 xl:gap-8">
                 {dummyProjects.map((project) => (
                   <motion.div
                     key={project.id}
                     whileHover={{ y: -6 }}
                     transition={{ type: "spring", stiffness: 250, damping: 20 }}
-                    className="group relative h-[300px] md:h-[400px] rounded-2xl md:rounded-3xl overflow-hidden border border-zinc-200 bg-zinc-100 shadow-lg cursor-pointer"
+                    className="group relative h-[300px] md:h-[400px] rounded-2xl xl:rounded-3xl overflow-hidden border border-zinc-200 bg-zinc-100 shadow-xl cursor-pointer"
                   >
                     <Image
                       src={project.image}
@@ -703,20 +705,20 @@ export default function Home() {
                       className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                     />
 
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent md:bg-black/80 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent xl:bg-black/80 lg:opacity-0 xl:group-hover:opacity-100 transition-opacity duration-300" />
 
-                    <div className="absolute inset-0 p-6 md:p-8 flex flex-col justify-end text-white z-10 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-300 translate-y-0 md:translate-y-4 md:group-hover:translate-y-0">
-                      <div className="mb-2 md:mb-3">
-                        <span className="inline-block px-3 py-1 rounded-full bg-blue-600 text-white font-mono text-[9px] md:text-xs font-extrabold tracking-wider uppercase shadow-md">
+                    <div className="absolute inset-0 p-6 xl:p-8 flex flex-col justify-end text-white z-10 opacity-100 xl:opacity-0 xl:group-hover:opacity-100 transition-all duration-300 translate-y-0 xl:translate-y-4 xl:group-hover:translate-y-0">
+                      <div className="mb-2 xl:mb-3">
+                        <span className="inline-block px-3 py-1 rounded-full bg-blue-600 text-white font-mono text-[9px] xl:text-xs font-extrabold tracking-wider uppercase shadow-xl">
                           {project.category}
                         </span>
                       </div>
 
-                      <h3 className="text-lg md:text-2xl font-bold tracking-tight mb-1.5 md:mb-2 text-white">
+                      <h3 className="text-lg xl:text-2xl font-bold tracking-tight mb-1.5 xl:mb-2 text-white">
                         {project.title}
                       </h3>
 
-                      <p className="text-zinc-300 text-xs md:text-sm leading-relaxed line-clamp-3">
+                      <p className="text-zinc-300 text-xs xl:text-sm leading-relaxed line-clamp-3">
                         {project.description}
                       </p>
                     </div>
