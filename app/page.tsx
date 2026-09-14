@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import Image from "next/image";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "framer-motion";
 import LoadingScreen from "@/components/LoadingScreen";
 import StarBackground from "@/components/StarBackground";
 
-// Icon SVG Sosial Media (Update Baru)
 const WhatsappIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
   <svg role="img" viewBox="0 0 24 24" className={className} fill="currentColor" xmlns="http://www.w3.org/2000/svg">
     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
@@ -42,7 +42,6 @@ const EmailCardIcon = () => (
   </svg>
 );
 
-// SVGs Software Tools
 const FigmaIcon = () => (
   <svg className="w-6 h-6" viewBox="0 0 38 57" fill="none">
     <path d="M19 28.5C19 23.2533 23.2533 19 28.5 19C33.7467 19 38 23.2533 38 28.5C38 33.7467 33.7467 38 28.5 38H19V28.5Z" fill="#FF7262"/>
@@ -77,7 +76,6 @@ const AntigravityIcon = () => (
   </svg>
 );
 
-// Hobbies SVG Icons
 const CodeHobbyIcon = () => (
   <svg className="w-5 h-5 fill-current" viewBox="0 0 1024 1024">
     <path d="M516 673c0 4.4 3.4 8 7.5 8h185c4.1 0 7.5-3.6 7.5-8v-48c0-4.4-3.4-8-7.5-8h-185c-4.1 0-7.5 3.6-7.5 8zm-194.9 6.1l192-161c3.8-3.2 3.8-9.1 0-12.3l-192-160.9A7.95 7.95 0 0 0 308 351v62.7c0 2.4 1 4.6 2.9 6.1L420.7 512l-109.8 92.2a8.1 8.1 0 0 0-2.9 6.1V673c0 6.8 7.9 10.5 13.1 6.1M880 112H144c-17.7 0-32 14.3-32 32v736c0 17.7 14.3 32 32 32h736c17.7 0 32-14.3 32-32V144c0-17.7-14.3-32-32-32m-40 728H184V184h656z"/>
@@ -103,20 +101,17 @@ export default function Home() {
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
 
   const { scrollY, scrollYProgress } = useScroll();
-  
-  // Smooth Progress Bar Animation
+
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
     damping: 30,
     restDelta: 0.001,
   });
 
-  // Parallax pergerakan horizontal teks PORTFOLIO & CONTACT background
   const xLeft = useTransform(scrollY, [0, 800], [0, -250]);
   const xRight = useTransform(scrollY, [0, 800], [0, 250]);
   const contactX = useTransform(scrollY, [2000, 3200], [-200, 100]);
 
-  // Reset scroll posisi ke paling atas saat halaman di-refresh
   useEffect(() => {
     if ("scrollRestoration" in history) {
       history.scrollRestoration = "manual";
@@ -124,8 +119,7 @@ export default function Home() {
     window.scrollTo(0, 0);
   }, []);
 
-  // Typewriter Effect
-  const words = ["Web Developer", "App Developer"];
+  const words = useMemo(() => ["Web Developer", "App Developer"], []);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [currentText, setCurrentText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
@@ -152,16 +146,15 @@ export default function Home() {
     }, typingSpeed);
 
     return () => clearTimeout(timeout);
-  }, [currentText, isDeleting, currentWordIndex, isLoading]);
+  }, [currentText, isDeleting, currentWordIndex, isLoading, words]);
 
-  // Form Submit Handler (Web3Forms)
   const handleSubmitForm = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitStatus("idle");
 
     const formData = new FormData(e.currentTarget);
-    formData.append("access_key", "PASTE_YOUR_ACCESS_KEY_HERE");
+    formData.append("access_key", "60bf7cad-cfd7-4973-9290-272df46510a8");
 
     try {
       const response = await fetch("https://api.web3forms.com/submit", {
@@ -176,7 +169,7 @@ export default function Home() {
       } else {
         setSubmitStatus("error");
       }
-    } catch (error) {
+    } catch {
       setSubmitStatus("error");
     } finally {
       setIsSubmitting(false);
@@ -293,7 +286,6 @@ export default function Home() {
         }
       `}</style>
 
-      {/* Loading Screen */}
       <AnimatePresence>
         {isLoading && (
           <LoadingScreen onComplete={() => setIsLoading(false)} />
@@ -302,20 +294,17 @@ export default function Home() {
 
       {!isLoading && (
         <>
-          {/* HORIZONTAL SCROLL PROGRESS BAR (BIRU) */}
           <motion.div
             style={{ scaleX }}
             className="fixed top-0 left-0 right-0 h-[3px] bg-blue-600 origin-left z-[70]"
           />
 
-          {/* STICKY NAVBAR (PUTIH, TEKS HITAM, BERUBAH BIRU SAAT DIKLIK/HOVER) */}
           <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md text-black border-b border-zinc-200/80 shadow-sm py-4 px-4 md:px-16 transition-all duration-300">
             <div className="max-w-6xl mx-auto flex justify-between items-center">
               <a href="#" className="font-extrabold text-lg md:text-xl tracking-tighter hover:opacity-80 transition-opacity">
                 HENDRI<span className="text-blue-600">.</span>
               </a>
 
-              {/* Desktop Navigation Menu */}
               <div className="hidden md:flex gap-6 text-sm font-medium text-zinc-800">
                 <a href="#about" className="hover:text-blue-600 active:text-blue-600 transition-colors">About</a>
                 <a href="#skills" className="hover:text-blue-600 active:text-blue-600 transition-colors">Skills</a>
@@ -324,7 +313,6 @@ export default function Home() {
                 <a href="#contact" className="hover:text-blue-600 active:text-blue-600 transition-colors">Get in touch</a>
               </div>
 
-              {/* Mobile Burger Button */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="md:hidden w-9 h-9 flex flex-col justify-center items-center gap-1.5 focus:outline-none z-50"
@@ -346,7 +334,6 @@ export default function Home() {
             </div>
           </nav>
 
-          {/* Mobile Fullscreen/Dropdown Menu Overlay */}
           <AnimatePresence>
             {mobileMenuOpen && (
               <motion.div
@@ -395,7 +382,6 @@ export default function Home() {
             )}
           </AnimatePresence>
 
-          {/* ================= SECTION 1: HERO (PUTIH + GLOW EFEK & DOTS) ================= */}
           <section className="relative min-h-screen pt-20 md:pt-24 flex flex-col justify-between px-4 md:px-16 py-8 overflow-hidden">
             <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-72 md:w-96 h-72 md:h-96 bg-blue-500/15 rounded-full blur-[100px] pointer-events-none z-0" />
             
@@ -436,9 +422,11 @@ export default function Home() {
                 className="relative w-64 md:w-80 flex-shrink-0"
               >
                 <div className="relative border-2 border-black rounded-lg overflow-hidden bg-zinc-200 shadow-xl">
-                  <img
+                  <Image
                     src="/profile.png"
                     alt="Profile Photo"
+                    width={800}
+                    height={1000}
                     className="w-full h-[320px] md:h-[400px] object-cover"
                   />
                 </div>
@@ -451,7 +439,7 @@ export default function Home() {
                   style={{ backgroundColor: "#C9DEEC", color: "#024586" }}
                 >
                   <p className="text-[11px] md:text-xs font-semibold leading-relaxed">
-                    "If you trully want it, you'll find a way"
+                    &quot;If you trully want it, you&apos;ll find a way&quot;
                   </p>
                   <div 
                     className="absolute -top-2 left-6 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[8px]"
@@ -506,7 +494,6 @@ export default function Home() {
             </div>
           </section>
 
-          {/* ================= SECTION 2: ABOUT ME & EDUCATION & SOFT SKILLS (HITAM + BINTANG) ================= */}
           <section id="about" className="relative bg-black text-white px-4 md:px-16 py-16 md:py-24 flex flex-col justify-center items-center border-b border-zinc-900 overflow-hidden">
             <StarBackground />
 
@@ -519,7 +506,7 @@ export default function Home() {
                 className="flex-1 max-w-xl text-center md:text-left"
               >
                 <h2 className="text-3xl md:text-6xl font-black tracking-tight leading-tight mb-6 md:mb-8">
-                  <span className="text-outline-white">Hi there, I'm </span>
+                  <span className="text-outline-white">Hi there, I&apos;m </span>
                   <span className="text-white">Hendri</span>
                 </h2>
 
@@ -536,16 +523,17 @@ export default function Home() {
                 className="relative flex-shrink-0"
               >
                 <div className="relative w-64 md:w-80 h-[320px] md:h-[400px] rounded-3xl overflow-hidden border border-zinc-800 shadow-2xl bg-zinc-900">
-                  <img
+                  <Image
                     src="/profile.png"
                     alt="Hendri - Profile"
+                    width={800}
+                    height={1000}
                     className="w-full h-full object-cover"
                   />
                 </div>
               </motion.div>
             </div>
 
-            {/* Education Timeline */}
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -586,7 +574,6 @@ export default function Home() {
               </div>
             </motion.div>
 
-            {/* Soft Skills */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -614,7 +601,6 @@ export default function Home() {
             </motion.div>
           </section>
 
-          {/* ================= SECTION 3: TECHNICAL SKILLS (PUTIH) ================= */}
           <section id="skills" className="relative bg-white text-black px-4 md:px-16 py-16 md:py-28 flex flex-col justify-center items-center border-b border-zinc-200">
             <motion.div 
               initial={{ opacity: 0, y: 40 }}
@@ -684,7 +670,6 @@ export default function Home() {
             </motion.div>
           </section>
 
-          {/* ================= SECTION 4: PROJECTS (PUTIH) ================= */}
           <section id="projects" className="relative bg-white text-black px-4 md:px-16 py-16 md:py-28 flex flex-col justify-center items-center border-b border-zinc-200">
             <motion.div 
               initial={{ opacity: 0, y: 40 }}
@@ -710,9 +695,11 @@ export default function Home() {
                     transition={{ type: "spring", stiffness: 250, damping: 20 }}
                     className="group relative h-[300px] md:h-[400px] rounded-2xl md:rounded-3xl overflow-hidden border border-zinc-200 bg-zinc-100 shadow-lg cursor-pointer"
                   >
-                    <img
+                    <Image
                       src={project.image}
                       alt={project.title}
+                      width={1200}
+                      height={900}
                       className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                     />
 
@@ -739,7 +726,6 @@ export default function Home() {
             </motion.div>
           </section>
 
-          {/* ================= SECTION 5: LANGUAGE & HOBBIES (HITAM + BINTANG) ================= */}
           <section id="interests" className="relative bg-black text-white px-4 md:px-16 py-16 md:py-24 flex flex-col justify-center items-center overflow-hidden">
             <StarBackground />
 
@@ -799,7 +785,6 @@ export default function Home() {
             </motion.div>
           </section>
 
-          {/* ================= SECTION 6: GET IN TOUCH / CONTACT (PUTIH) ================= */}
           <section id="contact" className="relative bg-white text-black px-4 md:px-16 py-20 md:py-28 overflow-hidden flex flex-col justify-center items-center">
             <div className="absolute -bottom-10 right-0 pointer-events-none select-none z-0 opacity-20 overflow-hidden">
               <motion.span 
@@ -927,7 +912,6 @@ export default function Home() {
             </motion.div>
           </section>
 
-          {/* Footer */}
           <footer className="bg-black border-t border-zinc-900 text-center text-xs text-zinc-500 py-6">
             <p suppressHydrationWarning>© {new Date().getFullYear()} Hendri Yanto. All rights reserved.</p>
           </footer>

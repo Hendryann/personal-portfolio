@@ -3,14 +3,13 @@
 import { motion } from "framer-motion";
 
 export default function StarBackground() {
-  // Generate posisi acak untuk bintang
-  const stars = Array.from({ length: 35 }).map((_, i) => ({
+  const stars = Array.from({ length: 35 }, (_, i) => ({
     id: i,
-    top: `${Math.random() * 100}%`,
-    left: `${Math.random() * 100}%`,
-    size: Math.random() * 2 + 1, // 1px - 3px
-    duration: Math.random() * 3 + 2, // 2s - 5s
-    delay: Math.random() * 2,
+    top: `${(i * 17) % 100}%`,
+    left: `${(i * 29) % 100}%`,
+    size: (i % 3) + 1,
+    duration: 2 + (i % 4),
+    delay: (i % 6) * 0.35,
   }));
 
   return (

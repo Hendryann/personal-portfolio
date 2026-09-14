@@ -12,7 +12,6 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
       className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black text-white px-6"
     >
       <div className="flex flex-col items-center gap-6">
-        {/* Brand Name */}
         <motion.h1
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -22,7 +21,6 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
           HENDRI<span className="text-blue-600">.</span>
         </motion.h1>
 
-        {/* Minimalist Loading Bar */}
         <div className="w-48 h-[2px] bg-zinc-800 rounded-full overflow-hidden relative">
           <motion.div
             initial={{ x: "-100%" }}
