@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "framer-motion";
 import LoadingScreen from "@/components/LoadingScreen";
 import StarBackground from "@/components/StarBackground";
@@ -77,6 +77,10 @@ const AntigravityIcon = () => (
   </svg>
 );
 
+const BackendIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12 21q-3.775 0-6.387-1.162T3 17V7q0-1.65 2.638-2.825T12 3t6.363 1.175T21 7v10q0 1.675-2.613 2.838T12 21m0-11.975q2.225 0 4.475-.638T19 7.025q-.275-.725-2.512-1.375T12 5q-2.275 0-4.462.638T5 7.025q.35.75 2.538 1.375T12 9.025M12 14q1.05 0 2.025-.1t1.863-.288t1.675-.462T19 12.525v-3q-.65.35-1.437.625t-1.675.463t-1.863.287T12 11t-2.05-.1t-1.888-.288T6.4 10.15T5 9.525v3q.625.35 1.4.625t1.663.463t1.887.287T12 14m0 5q1.15 0 2.338-.175t2.187-.462t1.675-.65t.8-.738v-2.45q-.65.35-1.437.625t-1.675.463t-1.863.287T12 16t-2.05-.1t-1.888-.288T6.4 15.15T5 14.525V17q.125.375.788.725t1.662.638t2.2.462T12 19"/></svg>
+);
+
 const CodeHobbyIcon = () => (
   <svg className="w-5 h-5 fill-current" viewBox="0 0 1024 1024">
     <path d="M516 673c0 4.4 3.4 8 7.5 8h185c4.1 0 7.5-3.6 7.5-8v-48c0-4.4-3.4-8-7.5-8h-185c-4.1 0-7.5 3.6-7.5 8zm-194.9 6.1l192-161c3.8-3.2 3.8-9.1 0-12.3l-192-160.9A7.95 7.95 0 0 0 308 351v62.7c0 2.4 1 4.6 2.9 6.1L420.7 512l-109.8 92.2a8.1 8.1 0 0 0-2.9 6.1V673c0 6.8 7.9 10.5 13.1 6.1M880 112H144c-17.7 0-32 14.3-32 32v736c0 17.7 14.3 32 32 32h736c17.7 0 32-14.3 32-32V144c0-17.7-14.3-32-32-32m-40 728H184V184h656z"/>
@@ -100,6 +104,7 @@ export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
+  const [activeSection, setActiveSection] = useState("about");
 
   const { scrollY, scrollYProgress } = useScroll();
 
@@ -112,7 +117,12 @@ export default function Home() {
   const xLeft = useTransform(scrollY, [0, 800], [0, -250]);
   const xRight = useTransform(scrollY, [0, 800], [0, 250]);
   const contactX = useTransform(scrollY, [2000, 3200], [-200, 100]);
-  
+
+  const aboutRef = useRef<HTMLElement>(null);
+  const skillsRef = useRef<HTMLElement>(null);
+  const projectsRef = useRef<HTMLElement>(null);
+  const interestsRef = useRef<HTMLElement>(null);
+  const contactRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     if ("scrollRestoration" in history) {
@@ -120,6 +130,42 @@ export default function Home() {
     }
     window.scrollTo(0, 0);
   }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + 200;
+      const sections = [
+        { id: "about", ref: aboutRef },
+        { id: "skills", ref: skillsRef },
+        { id: "projects", ref: projectsRef },
+        { id: "interests", ref: interestsRef },
+        { id: "contact", ref: contactRef },
+      ];
+
+      for (const section of sections) {
+        if (section.ref.current) {
+          const top = section.ref.current.offsetTop;
+          const height = section.ref.current.offsetHeight;
+          if (scrollPosition >= top && scrollPosition < top + height) {
+            setActiveSection(section.id);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
+    e.preventDefault();
+    const element = document.getElementById(targetId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+    setMobileMenuOpen(false);
+  };
 
   const words = useMemo(() => ["Web Developer", "App Developer"], []);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
@@ -229,34 +275,39 @@ export default function Home() {
     "Javascript",
   ];
 
-  const dummyProjects = [
+  const actualProjects = [
     {
       id: 1,
-      title: "Project Dummy 1 — Cita Rasa Nusantara",
-      category: "CULINARY & LANDING PAGE",
-      description: "Landing page restoran masakan Indonesia dengan menu interaktif, rating, dan custom cursor.",
-      image: "/dummy.png",
+      title: "BrainUP",
+      number: "#001",
+      category: "GAMIFIED E-LEARNING PLATFORM",
+      description: "An e-learning platform featuring gamification to make learning engaging and enjoyable for users.",
+      image: "/Project 1.webp",
+      tech: ["Flutter", "Dart", "Node.js"],
+      feRepo: "https://github.com/PokerTick/BrainUp",
+      beRepo: "https://github.com/Giovan-pemula/MobileHybridSolution-BE",
     },
     {
       id: 2,
-      title: "Project Dummy 2 — E-Commerce Modern",
-      category: "MOBILE APP & E-COMMERCE",
-      description: "Aplikasi e-commerce berbasis Flutter dengan payment gateway terintegrasi dan UI modern.",
-      image: "/dummy.png",
+      title: "Honkai Retail",
+      number: "#002",
+      category: "INGAME E-COMMERCE MOBILE APP",
+      description: "A specialized mobile e-commerce application designed specifically for trading in-game items securely.",
+      image: "/Project 2.webp",
+      tech: ["Flutter", "Dart", "Firebase"],
+      feRepo: "https://github.com/Hendryann/mobile-honkia-retail",
+      beRepo: "https://github.com/Hendryann/mobile-honkia-retail",
     },
     {
       id: 3,
-      title: "Project Dummy 3 — Dashboard Analytics",
-      category: "WEB DEVELOPMENT & DASHBOARD",
-      description: "Dashboard analitik data real-time menggunakan Next.js, Tailwind CSS, dan Chart.js.",
-      image: "/dummy.png",
-    },
-    {
-      id: 4,
-      title: "Project Dummy 4 — Smart Education Platform",
-      category: "UI/UX & PLATFORM",
-      description: "Platform pembelajaran online interaktif dengan fitur kuis dan pelacakan progres siswa.",
-      image: "/dummy.png",
+      title: "SunibEvent",
+      number: "#003",
+      category: "CAMPUS EVENT DISCOVERY",
+      description: "A web platform enabling Binusian students to effortlessly discover and register for campus organization events.",
+      image: "/Project 3.webp",
+      tech: ["Next.js", "Tailwind CSS", "Node.js"],
+      feRepo: "https://github.com/GerasimosAlpen/SunibEvent-FE",
+      beRepo: "https://github.com/GerasimosAlpen/SunibEvent-BE",
     },
   ];
 
@@ -275,8 +326,34 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-white text-black relative overflow-x-hidden font-sans selection:bg-blue-600 selection:text-white">
       <style jsx global>{`
+        @import url('https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@900&f[]=satoshi@400,500,700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Martian+Mono:wght@500;600;700&display=swap');
+
         html {
           scroll-behavior: smooth;
+        }
+        .brand-font {
+          font-family: 'Cabinet Grotesk', sans-serif;
+          font-weight: 900;
+          letter-spacing: -0.03em;
+        }
+        .mono-role {
+          font-family: 'Martian Mono', monospace;
+          font-weight: 600;
+          color: #2563eb;
+        }
+        .card-desc {
+          font-family: 'Satoshi', sans-serif;
+          font-weight: 400;
+          font-size: 15px;
+          color: #475569;
+          line-height: 1.6;
+        }
+        .mono-badge {
+          font-family: 'Martian Mono', monospace;
+          font-weight: 600;
+          font-size: 12px;
+          text-transform: uppercase;
         }
         .text-outline-black {
           -webkit-text-stroke: 1.5px rgba(0, 0, 0, 0.15);
@@ -303,16 +380,15 @@ export default function Home() {
 
           <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md text-black border-b border-zinc-200/80 shadow-sm py-4 px-4 md:px-16 transition-all duration-300">
             <div className="max-w-6xl mx-auto flex justify-between items-center">
-              <a href="#" className="font-extrabold text-lg md:text-xl tracking-tighter hover:opacity-80 transition-opacity">
+              <a href="#" onClick={(e) => handleNavClick(e, "about")} className="brand-font text-lg md:text-xl tracking-tighter hover:opacity-80 transition-opacity">
                 HENDRI<span className="text-blue-600">.</span>
               </a>
 
-              <div className="hidden md:flex gap-6 text-sm font-medium text-zinc-800">
-                <a href="#about" className="hover:text-blue-600 active:text-blue-600 transition-colors">About</a>
-                <a href="#skills" className="hover:text-blue-600 active:text-blue-600 transition-colors">Skills</a>
-                <a href="#projects" className="hover:text-blue-600 active:text-blue-600 transition-colors">Projects</a>
-                <a href="#interests" className="hover:text-blue-600 active:text-blue-600 transition-colors">Interests</a>
-                <a href="#contact" className="hover:text-blue-600 active:text-blue-600 transition-colors">Get in touch</a>
+              <div className="hidden md:flex gap-2 text-sm font-medium text-zinc-800">
+                <a href="#about" onClick={(e) => handleNavClick(e, "about")} className={`transition-all px-4 py-1.5 rounded-full ${activeSection === "about" ? "text-white bg-black font-bold shadow-sm" : "hover:text-blue-600"}`}>About</a>
+                <a href="#skills" onClick={(e) => handleNavClick(e, "skills")} className={`transition-all px-4 py-1.5 rounded-full ${activeSection === "skills" ? "text-white bg-black font-bold shadow-sm" : "hover:text-blue-600"}`}>Skills</a>
+                <a href="#projects" onClick={(e) => handleNavClick(e, "projects")} className={`transition-all px-4 py-1.5 rounded-full ${activeSection === "projects" ? "text-white bg-black font-bold shadow-sm" : "hover:text-blue-600"}`}>Projects</a>
+                <a href="#interests" onClick={(e) => handleNavClick(e, "interests")} className={`transition-all px-4 py-1.5 rounded-full ${activeSection === "interests" ? "text-white bg-black font-bold shadow-sm" : "hover:text-blue-600"}`}>Interests</a>
               </div>
 
               <button
@@ -347,44 +423,37 @@ export default function Home() {
               >
                 <a
                   href="#about"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="hover:text-blue-600 active:text-blue-600 transition-colors"
+                  onClick={(e) => handleNavClick(e, "about")}
+                  className={`transition-all px-6 py-2 rounded-full ${activeSection === "about" ? "text-white bg-black font-bold shadow-sm" : "hover:text-blue-600"}`}
                 >
                   About
                 </a>
                 <a
                   href="#skills"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="hover:text-blue-600 active:text-blue-600 transition-colors"
+                  onClick={(e) => handleNavClick(e, "skills")}
+                  className={`transition-all px-6 py-2 rounded-full ${activeSection === "skills" ? "text-white bg-black font-bold shadow-sm" : "hover:text-blue-600"}`}
                 >
                   Skills
                 </a>
                 <a
                   href="#projects"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="hover:text-blue-600 active:text-blue-600 transition-colors"
+                  onClick={(e) => handleNavClick(e, "projects")}
+                  className={`transition-all px-6 py-2 rounded-full ${activeSection === "projects" ? "text-white bg-black font-bold shadow-sm" : "hover:text-blue-600"}`}
                 >
                   Projects
                 </a>
                 <a
                   href="#interests"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="hover:text-blue-600 active:text-blue-600 transition-colors"
+                  onClick={(e) => handleNavClick(e, "interests")}
+                  className={`transition-all px-6 py-2 rounded-full ${activeSection === "interests" ? "text-white bg-black font-bold shadow-sm" : "hover:text-blue-600"}`}
                 >
                   Interests
-                </a>
-                <a
-                  href="#contact"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="hover:text-blue-600 active:text-blue-600 transition-colors"
-                >
-                  Get in touch
                 </a>
               </motion.div>
             )}
           </AnimatePresence>
 
-          <section className="relative min-h-screen pt-20 md:pt-24 flex flex-col justify-between px-4 md:px-16 py-8 overflow-hidden">
+          <section ref={aboutRef} id="about" className="relative min-h-screen pt-20 md:pt-24 flex flex-col justify-between px-4 md:px-16 py-8 overflow-hidden">
             <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-72 md:w-96 h-72 md:h-96 bg-blue-500/15 rounded-full blur-[100px] pointer-events-none z-0" />
             
             <div 
@@ -398,19 +467,19 @@ export default function Home() {
             <div className="absolute inset-0 flex flex-col justify-center items-center pointer-events-none select-none z-0 opacity-80 overflow-hidden">
               <motion.span 
                 style={{ x: xLeft }}
-                className="text-[18vw] md:text-[12vw] font-black leading-none tracking-tighter uppercase text-outline-black whitespace-nowrap"
+                className="brand-font text-[18vw] md:text-[12vw] leading-none tracking-tighter uppercase text-outline-black whitespace-nowrap"
               >
                 PORTFOLIO
               </motion.span>
               <motion.span 
                 style={{ x: xRight }}
-                className="text-[18vw] md:text-[12vw] font-black leading-none tracking-tighter uppercase text-outline-black my-[-3vw] md:my-[-2vw] whitespace-nowrap"
+                className="brand-font text-[18vw] md:text-[12vw] leading-none tracking-tighter uppercase text-outline-black my-[-3vw] md:my-[-2vw] whitespace-nowrap"
               >
                 PORTFOLIO
               </motion.span>
               <motion.span 
                 style={{ x: xLeft }}
-                className="text-[18vw] md:text-[12vw] font-black leading-none tracking-tighter uppercase text-outline-black whitespace-nowrap"
+                className="brand-font text-[18vw] md:text-[12vw] leading-none tracking-tighter uppercase text-outline-black whitespace-nowrap"
               >
                 PORTFOLIO
               </motion.span>
@@ -456,12 +525,12 @@ export default function Home() {
                 transition={{ duration: 0.8, delay: 0.4 }}
                 className="flex flex-col items-start max-w-md w-full"
               >
-                <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase text-black mb-1">
+                <h1 className="brand-font text-4xl md:text-6xl tracking-tighter uppercase text-black mb-1">
                   PORTFOLIO
                 </h1>
 
-                <div className="flex items-center gap-2 text-base md:text-xl font-mono text-zinc-700 font-semibold mb-6 md:mb-8 min-h-[32px]">
-                  <span className="text-blue-600 font-bold">&gt;</span>
+                <div className="flex items-center gap-2 text-base md:text-xl mono-role mb-6 md:mb-8 min-h-[32px]">
+                  <span>&gt;</span>
                   <span>{currentText}</span>
                   <span className="w-[2px] h-5 md:h-6 bg-blue-600 animate-pulse inline-block" />
                 </div>
@@ -496,7 +565,7 @@ export default function Home() {
             </div>
           </section>
 
-          <section id="about" className="relative bg-black text-white px-4 md:px-16 py-16 md:py-24 flex flex-col justify-center items-center border-b border-zinc-900 overflow-hidden">
+          <section className="relative bg-black text-white px-4 md:px-16 py-16 md:py-24 flex flex-col justify-center items-center border-b border-zinc-900 overflow-hidden">
             <StarBackground />
 
             <div className="relative z-10 max-w-5xl mx-auto w-full flex flex-col-reverse md:flex-row items-center justify-between gap-10 md:gap-16 mb-16 md:mb-24">
@@ -507,13 +576,13 @@ export default function Home() {
                 transition={{ duration: 0.8 }}
                 className="flex-1 max-w-xl text-center md:text-left"
               >
-                <h2 className="text-3xl md:text-6xl font-black tracking-tight leading-tight mb-6 md:mb-8">
+                <h2 className="brand-font text-3xl md:text-6xl tracking-tight leading-tight mb-6 md:mb-8">
                   <span className="text-outline-white">Hi there, I&apos;m </span>
                   <span className="text-white">Hendri</span>
                 </h2>
 
                 <p className="text-zinc-300 text-sm md:text-lg leading-relaxed font-normal">
-                  Saya adalah mahasiswa Universitas Bina Nusantara (BINUS) dengan pengalaman dalam mengerjakan project website, aplikasi Android, dan desain UI/UX. Saya memiliki ketertarikan dalam menciptakan solusi digital yang fungsional, modern, dan mudah digunakan, serta terus mengembangkan kemampuan saya melalui berbagai project dan pengalaman dalam bidang teknologi.
+                  I am a Computer Science student at Bina Nusantara University (BINUS) with hands-on experience in building web applications, Android apps, and UI/UX designs. I am passionate about creating functional, modern, and user-friendly digital solutions while continuously expanding my skills through various projects and technology experiences.
                 </p>
               </motion.div>
 
@@ -603,7 +672,7 @@ export default function Home() {
             </motion.div>
           </section>
 
-          <section id="skills" className="relative bg-white text-black px-4 md:px-16 py-16 md:py-28 flex flex-col justify-center items-center border-b border-zinc-200">
+          <section ref={skillsRef} id="skills" className="relative bg-white text-black px-4 md:px-16 py-16 md:py-28 flex flex-col justify-center items-center border-b border-zinc-200">
             <motion.div 
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -612,11 +681,11 @@ export default function Home() {
               className="max-w-5xl mx-auto w-full"
             >
               <div className="text-center mb-12 md:mb-16">
-                <h2 className="text-3xl md:text-5xl font-black tracking-tight uppercase mb-2 md:mb-3 text-black">
+                <h2 className="brand-font text-3xl md:text-5xl tracking-tight uppercase mb-2 md:mb-3 text-black">
                   Technical Skills
                 </h2>
                 <p className="text-zinc-500 font-mono text-xs md:text-sm">
-                  Tools dan bahasa pemrograman yang biasa saya gunakan
+                  Tools and programming languages I regularly use
                 </p>
               </div>
 
@@ -672,7 +741,7 @@ export default function Home() {
             </motion.div>
           </section>
 
-          <section id="projects" className="relative bg-white text-black px-4 md:px-16 py-16 md:py-28 flex flex-col justify-center items-center border-b border-zinc-200">
+          <section ref={projectsRef} id="projects" className="relative bg-white text-black px-4 md:px-16 py-16 md:py-28 flex flex-col justify-center items-center border-b border-zinc-200">
             <motion.div 
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -680,47 +749,158 @@ export default function Home() {
               transition={{ duration: 0.8 }}
               className="max-w-5xl mx-auto w-full"
             >
-              <div className="text-center mb-12 md:mb-16">
-                <h2 className="text-3xl md:text-5xl font-black tracking-tight uppercase mb-2 md:mb-3 text-black">
-                  Projects
+              <div className="text-left mb-12 md:mb-16">
+                <h2 className="brand-font text-3xl md:text-5xl tracking-tight uppercase mb-2 md:mb-3 text-black">
+                  PROJECTS
                 </h2>
-                <p className="text-zinc-500 font-mono text-xs md:text-sm">
-                  Kumpulan projek yang pernah saya kerjakan
-                </p>
+                <div className="flex items-center gap-2 text-sm mono-role">
+                  <span>&gt;</span>
+                  <span>Featured Repositories &amp; Deployments</span>
+                  <span className="w-2 h-2 bg-blue-600 inline-block" />
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 xl:gap-8">
-                {dummyProjects.map((project) => (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                {actualProjects.slice(0, 2).map((project) => (
                   <motion.div
                     key={project.id}
                     whileHover={{ y: -6 }}
                     transition={{ type: "spring", stiffness: 250, damping: 20 }}
-                    className="group relative h-[300px] md:h-[400px] rounded-2xl xl:rounded-3xl overflow-hidden border border-zinc-200 bg-zinc-100 shadow-xl cursor-pointer"
+                    className="group relative rounded-3xl overflow-hidden border border-zinc-200 bg-zinc-50 shadow-xl flex flex-col justify-between"
                   >
-                    <Image
-                      src={project.image}
-                      alt={project.title}
-                      width={1200}
-                      height={900}
-                      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                    />
+                    <div className="relative h-[240px] md:h-[280px] w-full overflow-hidden bg-zinc-100">
+                      <Image
+                        src={project.image}
+                        alt={project.title}
+                        width={1200}
+                        height={900}
+                        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                      />
+                      <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-md px-3 py-1 rounded-full text-white mono-badge">
+                        {project.number}
+                      </div>
+                    </div>
 
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent xl:bg-black/80 lg:opacity-0 xl:group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="p-6 md:p-8 flex flex-col flex-grow justify-between bg-white">
+                      <div>
+                        <div className="mb-3">
+                          <span className="inline-block px-3 py-1 rounded-full bg-blue-50 text-blue-600 mono-badge">
+                            {project.category}
+                          </span>
+                        </div>
 
-                    <div className="absolute inset-0 p-6 xl:p-8 flex flex-col justify-end text-white z-10 opacity-100 xl:opacity-0 xl:group-hover:opacity-100 transition-all duration-300 translate-y-0 xl:translate-y-4 xl:group-hover:translate-y-0">
-                      <div className="mb-2 xl:mb-3">
-                        <span className="inline-block px-3 py-1 rounded-full bg-blue-600 text-white font-mono text-[9px] xl:text-xs font-extrabold tracking-wider uppercase shadow-xl">
-                          {project.category}
-                        </span>
+                        <h3 className="brand-font text-xl md:text-2xl tracking-tight mb-2 text-black">
+                          {project.title}
+                        </h3>
+
+                        <p className="card-desc mb-6">
+                          {project.description}
+                        </p>
                       </div>
 
-                      <h3 className="text-lg xl:text-2xl font-bold tracking-tight mb-1.5 xl:mb-2 text-white">
-                        {project.title}
-                      </h3>
+                      <div>
+                        <div className="flex flex-wrap gap-2 mb-6">
+                          {project.tech.map((t, i) => (
+                            <span key={i} className="px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-700 font-mono text-[11px] font-medium">
+                              {t}
+                            </span>
+                          ))}
+                        </div>
 
-                      <p className="text-zinc-300 text-xs xl:text-sm leading-relaxed line-clamp-3">
-                        {project.description}
-                      </p>
+                        <div className="grid grid-cols-2 gap-3 pt-4 border-t border-zinc-100">
+                          <a
+                            href={project.feRepo}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-zinc-200 bg-zinc-50 hover:bg-black hover:text-white hover:border-black transition-all duration-300 mono-badge text-zinc-800"
+                          >
+                            <GithubIcon className="w-4 h-4" />
+                            <span>Frontend Repo</span>
+                          </a>
+                          <a
+                            href={project.beRepo}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-zinc-200 bg-zinc-50 hover:bg-black hover:text-white hover:border-black transition-all duration-300 mono-badge text-zinc-800"
+                          >
+                            <BackendIcon />
+                            <span>Backend Repo</span>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-1 mt-6 md:mt-8 max-w-xl mx-auto w-full">
+                {actualProjects.slice(2, 3).map((project) => (
+                  <motion.div
+                    key={project.id}
+                    whileHover={{ y: -6 }}
+                    transition={{ type: "spring", stiffness: 250, damping: 20 }}
+                    className="group relative rounded-3xl overflow-hidden border border-zinc-200 bg-zinc-50 shadow-xl flex flex-col justify-between"
+                  >
+                    <div className="relative h-[240px] md:h-[280px] w-full overflow-hidden bg-zinc-100">
+                      <Image
+                        src={project.image}
+                        alt={project.title}
+                        width={1200}
+                        height={900}
+                        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                      />
+                      <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-md px-3 py-1 rounded-full text-white mono-badge">
+                        {project.number}
+                      </div>
+                    </div>
+
+                    <div className="p-6 md:p-8 flex flex-col flex-grow justify-between bg-white">
+                      <div>
+                        <div className="mb-3">
+                          <span className="inline-block px-3 py-1 rounded-full bg-blue-50 text-blue-600 mono-badge">
+                            {project.category}
+                          </span>
+                        </div>
+
+                        <h3 className="brand-font text-xl md:text-2xl tracking-tight mb-2 text-black">
+                          {project.title}
+                        </h3>
+
+                        <p className="card-desc mb-6">
+                          {project.description}
+                        </p>
+                      </div>
+
+                      <div>
+                        <div className="flex flex-wrap gap-2 mb-6">
+                          {project.tech.map((t, i) => (
+                            <span key={i} className="px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-700 font-mono text-[11px] font-medium">
+                              {t}
+                            </span>
+                          ))}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 pt-4 border-t border-zinc-100">
+                          <a
+                            href={project.feRepo}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-zinc-200 bg-zinc-50 hover:bg-black hover:text-white hover:border-black transition-all duration-300 mono-badge text-zinc-800"
+                          >
+                            <GithubIcon className="w-4 h-4" />
+                            <span>Frontend Repo</span>
+                          </a>
+                          <a
+                            href={project.beRepo}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-zinc-200 bg-zinc-50 hover:bg-black hover:text-white hover:border-black transition-all duration-300 mono-badge text-zinc-800"
+                          >
+                            <BackendIcon />
+                            <span>Backend Repo</span>
+                          </a>
+                        </div>
+                      </div>
                     </div>
                   </motion.div>
                 ))}
@@ -728,7 +908,7 @@ export default function Home() {
             </motion.div>
           </section>
 
-          <section id="interests" className="relative bg-black text-white px-4 md:px-16 py-16 md:py-24 flex flex-col justify-center items-center overflow-hidden">
+          <section ref={interestsRef} id="interests" className="relative bg-black text-white px-4 md:px-16 py-16 md:py-24 flex flex-col justify-center items-center overflow-hidden">
             <StarBackground />
 
             <motion.div 
@@ -787,11 +967,11 @@ export default function Home() {
             </motion.div>
           </section>
 
-          <section id="contact" className="relative bg-white text-black px-4 md:px-16 py-20 md:py-28 overflow-hidden flex flex-col justify-center items-center">
+          <section ref={contactRef} id="contact" className="relative bg-white text-black px-4 md:px-16 py-20 md:py-28 overflow-hidden flex flex-col justify-center items-center">
             <div className="absolute -bottom-10 right-0 pointer-events-none select-none z-0 opacity-20 overflow-hidden">
               <motion.span 
                 style={{ x: contactX }}
-                className="text-[20vw] md:text-[18vw] font-black leading-none tracking-tighter uppercase text-outline-black whitespace-nowrap block"
+                className="brand-font text-[20vw] md:text-[18vw] leading-none tracking-tighter uppercase text-outline-black whitespace-nowrap block"
               >
                 CONTACT
               </motion.span>
@@ -806,11 +986,11 @@ export default function Home() {
             >
               <div className="md:col-span-5 flex flex-col justify-between h-full space-y-8">
                 <div>
-                  <h2 className="text-3xl md:text-5xl font-black tracking-tight uppercase mb-3 text-black">
+                  <h2 className="brand-font text-3xl md:text-5xl tracking-tight uppercase mb-3 text-black">
                     Get In Touch
                   </h2>
                   <p className="text-zinc-500 font-mono text-xs md:text-sm">
-                    Silakan hubungi saya untuk kolaborasi atau sekadar bertanya
+                    Feel free to reach out for collaborations or inquiries
                   </p>
                 </div>
 
@@ -900,13 +1080,13 @@ export default function Home() {
                   </button>
 
                   {submitStatus === "success" && (
-                    <p className="text-xs font-mono text-green-600 mt-2">
-                      ✓ Pesan berhasil dikirim! Terima kasih sudah menghubungi.
+                    <p className="text-xs font-mono text-green-600 menu-badge mt-2">
+                      ✓ Message sent successfully! Thank you for reaching out.
                     </p>
                   )}
-                  {submitStatus === "error" && (
+                  {submitStatus === "error" /* eslint-disable-line no-constant-condition */ && (
                     <p className="text-xs font-mono text-red-500 mt-2">
-                      ✕ Gagal mengirim pesan. Pastikan Web3Forms Access Key sudah diisi.
+                      ✕ Failed to send message. Please ensure your Web3Forms Access Key is valid.
                     </p>
                   )}
                 </form>

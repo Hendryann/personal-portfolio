@@ -1,25 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useSpring } from "framer-motion";
 
 export default function CustomCursor() {
-  const [mousePosition, setMousePosition] = useState({ x: -100, y: -100 });
+  const [isMounted, setIsMounted] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
+
+  const cursorX = useMotionValue(-100);
+  const cursorY = useMotionValue(-100);
+
+  const springConfig = { damping: 30, stiffness: 300, mass: 0.2 };
+  const cursorXSpring = useSpring(cursorX, springConfig);
+  const cursorYSpring = useSpring(cursorY, springConfig);
 
   useEffect(() => {
-    
-    if (window.matchMedia("(pointer: coarse)").matches) return;
-    setIsVisible(true);
+    setIsMounted(true);
 
-    const updateMousePosition = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
+    const handleMouseMove = (e: MouseEvent) => {
+      cursorX.set(e.clientX);
+      cursorY.set(e.clientY);
     };
 
-    window.addEventListener("mousemove", updateMousePosition);
-
-    
     const handleMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (
@@ -30,71 +32,49 @@ export default function CustomCursor() {
         target.dataset.cursor === "hover"
       ) {
         setIsHovered(true);
-      }
-    };
-
-    const handleMouseOut = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (
-        target.tagName === "A" ||
-        target.tagName === "BUTTON" ||
-        target.closest("a") ||
-        target.closest("button") ||
-        target.dataset.cursor === "hover"
-      ) {
+      } else {
         setIsHovered(false);
       }
     };
 
+    window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseover", handleMouseOver);
-    window.addEventListener("mouseout", handleMouseOut);
 
     return () => {
-      window.removeEventListener("mousemove", updateMousePosition);
+      window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseover", handleMouseOver);
-      window.removeEventListener("mouseout", handleMouseOut);
     };
-  }, []);
+  }, [cursorX, cursorY]);
 
-  if (!isVisible) return null;
+  if (!isMounted) return null;
 
   return (
     <>
-      
-      <motion.div
-        className="fixed top-0 left-0 pointer-events-none z-[9999] rounded-full border border-zinc-500 bg-zinc-500/20 backdrop-blur-[1px]"
-        animate={{
-          x: mousePosition.x - (isHovered ? 18 : 12),
-          y: mousePosition.y - (isHovered ? 18 : 12),
-          width: isHovered ? 36 : 24,
-          height: isHovered ? 36 : 24,
-        }}
-        transition={{
-          type: "spring",
-          stiffness: 350,
-          damping: 25,
-          mass: 0.08,
-        }}
-      />
+      <style jsx global>{`
+        @media (min-width: 768px) {
+          body {
+            cursor: none;
+          }
+          a, button, input, textarea, select {
+            cursor: none;
+          }
+        }
+      `}</style>
 
-      
       <motion.div
-        className="fixed top-0 left-0 pointer-events-none z-[9999] rounded-full bg-zinc-600 dark:bg-zinc-300"
-        animate={{
-          x: mousePosition.x - 3,
-          y: mousePosition.y - 3,
-          scale: isHovered ? 1 : 0,
-          opacity: isHovered ? 1 : 0,
-        }}
-        transition={{
-          type: "spring",
-          stiffness: 400,
-          damping: 25,
-        }}
+        className="fixed top-0 left-0 pointer-events-none z-[9999] rounded-full hidden md:block border border-zinc-400 bg-zinc-500/30 backdrop-invert-[0.2]"
         style={{
-          width: 6,
-          height: 6,
+          x: cursorXSpring,
+          y: cursorYSpring,
+          translateX: "-50%",
+          translateY: "-50%",
         }}
+        animate={{
+          width: isHovered ? 44 : 16,
+          height: isHovered ? 44 : 16,
+          opacity: isHovered ? 0.8 : 1,
+        }}
+        transition={{ type: "spring", stiffness: 400, damping: 28 }}
       />
     </>
   );
